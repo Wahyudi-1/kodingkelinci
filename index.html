@@ -22,7 +22,8 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0; 
             height: 100vh; 
-            overflow: hidden;
+            overflow-y: auto; /* Dibaiki: Membenarkan skrol jika skrin terlalu kecil */
+            overflow-x: hidden;
             background: linear-gradient(to bottom, var(--bg-top), #e1f5fe 40%, var(--bg-bottom) 40%, #4caf50 100%);
             display: flex; 
             flex-direction: column;
@@ -59,29 +60,41 @@
         }
         .btn:active { transform: translateY(4px); box-shadow: 0 0px #000 !important; }
         .btn-start { background: linear-gradient(to right, #ff9800, #f57c00); box-shadow: 0 6px #e65100; }
-        .btn-play { background: linear-gradient(to right, #66bb6a, #43a047); box-shadow: 0 6px #2e7d32; width: auto; padding: 15px 40px; margin-top: 10px;}
-        .btn-clear { background: #e0e0e0; color: #333; box-shadow: 0 4px #bdbdbd; width: auto; font-size: 1rem; padding: 10px 20px; }
+        
+        /* Dibaiki: Mengurangkan saiz padding dan membuang margin-top yang menolak elemen ke bawah */
+        .btn-play { background: linear-gradient(to right, #66bb6a, #43a047); box-shadow: 0 4px #2e7d32; flex: 2; font-size: 0.85rem; padding: 0 5px; display: flex; justify-content: center; align-items: center; text-align: center; margin: 0; border-radius: 10px;}
+        .btn-clear { background: #e0e0e0; color: #333; box-shadow: 0 4px #bdbdbd; flex: 1; font-size: 1.2rem; padding: 0 5px; display: flex; justify-content: center; align-items: center; text-align: center; margin: 0; border-radius: 10px;}
 
         /* --- GAME ARENA --- */
-        #game-arena { display: none; flex: 1; flex-direction: column; width: 100%; max-width: 800px; margin: 0 auto; }
+        #game-arena { 
+            display: none; 
+            flex: 1; 
+            flex-direction: column; 
+            width: 100%; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            overflow-y: auto; /* Dibaiki: Skrol khas untuk arena permainan */
+        }
         
         /* HEADER */
-        .header { text-align: center; padding: 10px; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); font-size: 1.5rem; font-weight: bold; }
+        .header { text-align: center; padding: 10px; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); font-size: 1.5rem; font-weight: bold; flex-shrink: 0; }
 
         /* GRID BOARD */
-        .board-container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 10px; perspective: 800px; }
+        .board-container { flex: 1 0 auto; display: flex; justify-content: center; align-items: center; padding: 20px 10px 40px 10px; perspective: 800px; }
         .board {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             grid-template-rows: repeat(4, 1fr);
             gap: 5px;
-            width: 90vw; max-width: 400px;
-            height: 90vw; max-height: 400px;
+            /* Dibaiki: Mengecilkan sedikit saiz papan untuk memberi ruang kepada butang di bawah */
+            width: 80vw; max-width: 350px;
+            height: 80vw; max-height: 350px;
             background: #8bc34a;
             padding: 10px; border-radius: 15px;
             box-shadow: 0 10px 20px rgba(0,0,0,0.3), inset 0 0 20px rgba(255,255,255,0.3);
             position: relative;
-            transform: rotateX(10deg); /* Sedikit efek 3D */
+            transform: rotateX(10deg);
+            margin-bottom: 20px;
         }
         .cell {
             background: var(--grid-bg); border: 2px solid var(--grid-border);
@@ -118,33 +131,47 @@
         /* --- KONTROL CODING (BAWAH) --- */
         .coding-area {
             background: white; border-top: 5px solid #ffca28;
-            border-radius: 20px 20px 0 0; padding: 15px;
-            display: flex; flex-direction: column; gap: 15px;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+            border-radius: 20px 20px 0 0; 
+            padding: 15px 15px 30px 15px; /* Dibaiki: Penyelarasan ruang dalam (padding) */
+            display: flex; flex-direction: column; gap: 10px;
+            box-shadow: 0 -10px 20px rgba(0,0,0,0.15);
+            flex-shrink: 0; /* Dibaiki: Mengelakkan kotak kod dari mengecut dan hilang */
+            position: relative;
+            z-index: 20;
         }
 
         /* Tempat naruh blok (Sequence) */
         .sequence-box {
             background: #f5f5f5; border: 3px dashed #ccc; border-radius: 12px;
-            height: 70px; display: flex; align-items: center; padding: 5px;
+            height: 60px; /* Dibaiki: Kurangkan sedikit ketinggian kotak urutan */
+            display: flex; align-items: center; padding: 5px;
             overflow-x: auto; gap: 5px;
         }
         .sequence-box:empty::before {
-            content: "Ketuk panah untuk menyusun kode...";
-            color: #aaa; font-style: italic; margin: auto; font-size: 1.1rem;
+            content: "Ketuk panah menyusun kode...";
+            color: #aaa; font-style: italic; margin: auto; font-size: 1rem;
         }
 
-        /* Palette Panah */
-        .palette { display: flex; justify-content: space-around; }
+        /* Palette Panah & Controls (Sejajar) */
+        .action-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .palette { display: flex; gap: 5px; }
         .coding-block {
-            width: 60px; height: 60px; border-radius: 12px; border: none;
+            width: 42px; height: 42px; border-radius: 10px; border: none; 
             display: flex; justify-content: center; align-items: center;
             cursor: pointer; transition: transform 0.1s;
-            box-shadow: 0 5px rgba(0,0,0,0.2);
+            box-shadow: 0 4px rgba(0,0,0,0.2);
+            flex-shrink: 0;
         }
-        .coding-block:active { transform: translateY(5px); box-shadow: 0 0 rgba(0,0,0,0); }
+        .coding-block:active { transform: translateY(4px); box-shadow: 0 0 rgba(0,0,0,0); }
         
-        .coding-block svg { width: 40px; height: 40px; fill: white; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3)); }
+        .coding-block svg { width: 24px; height: 24px; fill: white; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3)); }
         
         .cb-up { background: var(--block-up); }
         .cb-down { background: var(--block-down); }
@@ -152,14 +179,14 @@
         .cb-right { background: var(--block-right); }
 
         .block-item {
-            min-width: 50px; height: 50px; border-radius: 8px;
+            min-width: 40px; height: 40px; border-radius: 8px;
             display: flex; justify-content: center; align-items: center;
             animation: popIn 0.2s; cursor: pointer;
             box-shadow: 0 3px rgba(0,0,0,0.2);
         }
-        .block-item svg { width: 30px; height: 30px; fill: white; }
+        .block-item svg { width: 22px; height: 22px; fill: white; }
 
-        .controls { display: flex; justify-content: space-between; align-items: center; }
+        .controls { display: flex; flex: 1; gap: 5px; }
 
         /* Feedback Error */
         .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
@@ -224,24 +251,26 @@
                 <!-- Block sequence akan muncul di sini -->
             </div>
             
-            <div class="palette">
-                <button class="coding-block cb-up" onclick="addBlock('up')">
-                    <svg viewBox="0 0 24 24"><path d="M12 4l-8 8h6v8h4v-8h6z"/></svg>
-                </button>
-                <button class="coding-block cb-down" onclick="addBlock('down')">
-                    <svg viewBox="0 0 24 24"><path d="M12 20l8-8h-6v-8h-4v8h-6z"/></svg>
-                </button>
-                <button class="coding-block cb-left" onclick="addBlock('left')">
-                    <svg viewBox="0 0 24 24"><path d="M4 12l8-8v6h8v4h-8v6z"/></svg>
-                </button>
-                <button class="coding-block cb-right" onclick="addBlock('right')">
-                    <svg viewBox="0 0 24 24"><path d="M20 12l-8 8v-6h-8v-4h8v-6z"/></svg>
-                </button>
-            </div>
+            <div class="action-row">
+                <div class="palette">
+                    <button class="coding-block cb-up" onclick="addBlock('up')">
+                        <svg viewBox="0 0 24 24"><path d="M12 4l-8 8h6v8h4v-8h6z"/></svg>
+                    </button>
+                    <button class="coding-block cb-down" onclick="addBlock('down')">
+                        <svg viewBox="0 0 24 24"><path d="M12 20l8-8h-6v-8h-4v8h-6z"/></svg>
+                    </button>
+                    <button class="coding-block cb-left" onclick="addBlock('left')">
+                        <svg viewBox="0 0 24 24"><path d="M4 12l8-8v6h8v4h-8v6z"/></svg>
+                    </button>
+                    <button class="coding-block cb-right" onclick="addBlock('right')">
+                        <svg viewBox="0 0 24 24"><path d="M20 12l-8 8v-6h-8v-4h8v-6z"/></svg>
+                    </button>
+                </div>
 
-            <div class="controls">
-                <button class="btn btn-clear" onclick="clearSequence()">🗑 Hapus Semua</button>
-                <button class="btn btn-play" id="btn-play" onclick="runCode()">▶ JALANKAN</button>
+                <div class="controls">
+                    <button class="btn btn-clear" onclick="clearSequence()" title="Hapus">🗑</button>
+                    <button class="btn btn-play" id="btn-play" onclick="runCode()">▶ JALAN</button>
+                </div>
             </div>
         </div>
     </div>
@@ -299,10 +328,14 @@
 
         // --- GAME LOGIC ---
         const LEVELS = [
-            { start: {x:0, y:3}, goal: {x:2, y:3}, rocks: [] }, // Lv 1: Kanan 2x
-            { start: {x:0, y:3}, goal: {x:3, y:1}, rocks: [] }, // Lv 2: L shape
-            { start: {x:0, y:3}, goal: {x:3, y:3}, rocks: [{x:1, y:3}, {x:2, y:2}] }, // Lv 3: Ada batu
-            { start: {x:0, y:0}, goal: {x:3, y:3}, rocks: [{x:1, y:0}, {x:1, y:1}, {x:2, y:3}] } // Lv 4: Lebih kompleks
+            { start: {x:0, y:3}, goal: {x:1, y:3}, rocks: [] }, // Lv 1: Maju 1 langkah (Kanan 1x)
+            { start: {x:0, y:3}, goal: {x:3, y:3}, rocks: [] }, // Lv 2: Maju lurus panjang (Kanan 3x)
+            { start: {x:0, y:3}, goal: {x:0, y:1}, rocks: [] }, // Lv 3: Belajar arah atas (Atas 2x)
+            { start: {x:0, y:3}, goal: {x:2, y:1}, rocks: [] }, // Lv 4: Bentuk L (Kanan 2x, Atas 2x)
+            { start: {x:0, y:0}, goal: {x:2, y:2}, rocks: [] }, // Lv 5: Bentuk L turun (Kanan 2x, Bawah 2x)
+            { start: {x:0, y:3}, goal: {x:2, y:3}, rocks: [{x:1, y:3}] }, // Lv 6: Ada 1 halangan batu (Atas, Kanan, Kanan, Bawah)
+            { start: {x:0, y:3}, goal: {x:3, y:0}, rocks: [{x:1, y:3}, {x:2, y:1}, {x:2, y:2}] }, // Lv 7: Lorong berbelok
+            { start: {x:0, y:0}, goal: {x:3, y:3}, rocks: [{x:0, y:1}, {x:1, y:1}, {x:2, y:3}, {x:3, y:1}] } // Lv 8: Peringkat akhir yang lebih mencabar
         ];
 
         let currentLevel = 0;
@@ -441,7 +474,7 @@
         function enableControls(state) {
             isRunning = !state;
             document.getElementById('btn-play').style.opacity = state ? '1' : '0.5';
-            document.getElementById('btn-play').innerText = state ? '▶ JALANKAN' : '⏳ BERJALAN...';
+            document.getElementById('btn-play').innerText = state ? '▶ JALAN' : '⏳...';
         }
 
         // --- EXECUTION (Gerakan Psikomotor / Logika) ---
