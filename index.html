@@ -346,7 +346,76 @@
         let bunnyPos = {x:0, y:0};
         let bunnyDOM = null;
 
+        // --- AUDIO SYSTEM (Web Audio API) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function initAudio() {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playHopSound() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.15);
+
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.15);
+        }
+
+        function playWinSound() {
+            if (!audioCtx) return;
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // Nada: C5, E5, G5, C6
+            
+            notes.forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.type = 'triangle';
+                osc.frequency.value = freq;
+                
+                const startTime = audioCtx.currentTime + (i * 0.15);
+                gainNode.gain.setValueAtTime(0, startTime);
+                gainNode.gain.linearRampToValueAtTime(0.3, startTime + 0.05);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.3);
+                
+                osc.start(startTime);
+                osc.stop(startTime + 0.3);
+            });
+        }
+
+        function playCrashSound() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.3);
+
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.3);
+        }
+
         function startGame() {
+            initAudio(); // Aktifkan audio apabila butang mula ditekan
             document.getElementById('menu-screen').style.display = 'none';
             document.getElementById('game-arena').style.display = 'flex';
             loadLevel(0);
@@ -525,6 +594,8 @@
                 bunnyDOM.classList.add('hopping');
                 updateBunnyPosition();
                 
+                playHopSound(); // Mainkan kesan bunyi melompat
+
                 // Suara/Feedback imajiner: Minta anak loncat (via instruksi awal)
                 await sleep(600); // Waktu animasi lompat
                 bunnyDOM.classList.remove('hopping');
@@ -534,6 +605,7 @@
             // Cek Menang (jika tidak crash)
             if (!crashed) {
                 if (bunnyPos.x === level.goal.x && bunnyPos.y === level.goal.y) {
+                    playWinSound(); // Mainkan kesan bunyi kejayaan
                     setTimeout(() => {
                         document.getElementById('win-screen').style.display = 'flex';
                     }, 500);
@@ -554,6 +626,7 @@
         }
 
         function crashAnim() {
+            playCrashSound(); // Mainkan kesan bunyi ralat
             bunnyDOM.classList.add('shake');
         }
 
