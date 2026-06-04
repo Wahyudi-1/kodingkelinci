@@ -5,504 +5,341 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kelinci Coding: Ayo Melompat!</title>
     <style>
-        /* ==========================================================================
-           1. VARIABEL TEMA & RESET CSS
-           ========================================================================== */
         :root {
-            /* Palet Warna Ceria */
-            --bg-sky: #4fc3f7;
-            --bg-grass: #81c784;
+            --bg-top: #4fc3f7;
+            --bg-bottom: #81c784;
             --grid-bg: #aed581;
             --grid-border: #7cb342;
-            
-            /* Warna Tombol Arah */
-            --btn-up: #ef5350;    /* Merah */
-            --btn-down: #42a5f5;  /* Biru */
-            --btn-left: #ffca28;  /* Kuning */
-            --btn-right: #66bb6a; /* Hijau */
-            
-            --text-dark: #37474f;
-            --overlay-bg: rgba(0, 0, 0, 0.6);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+            --block-up: #ef5350;    /* Merah */
+            --block-down: #42a5f5;  /* Biru */
+            --block-left: #ffca28;  /* Kuning */
+            --block-right: #66bb6a; /* Hijau */
+            --ui-bg: #ffffff;
+            --text-main: #37474f;
         }
 
         body {
-            font-family: 'Comic Sans MS', 'Segoe UI', Tahoma, sans-serif; /* Font ramah anak */
-            height: 100vh;
-            overflow: hidden; /* Mencegah scroll */
-            background: linear-gradient(to bottom, var(--bg-sky) 0%, #e1f5fe 40%, var(--bg-grass) 40%, #4caf50 100%);
-            display: flex;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0; 
+            height: 100vh; 
+            overflow: hidden;
+            background: linear-gradient(to bottom, var(--bg-top), #e1f5fe 40%, var(--bg-bottom) 40%, #4caf50 100%);
+            display: flex; 
             flex-direction: column;
-            /* Mencegah zoom saat tap ganda di perangkat seluler */
-            touch-action: manipulation;
-            color: var(--text-dark);
+            touch-action: manipulation; /* Mencegah zoom saat di-tap ganda di HP */
         }
 
-        /* ==========================================================================
-           2. UI POP-UP (OVERLAY & CARD)
-           ========================================================================== */
+        /* --- UI POPUPS (Menu, Win, Overlay) --- */
         .overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: var(--overlay-bg);
-            backdrop-filter: blur(8px); /* Efek blur latar belakang */
-            z-index: 1000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 200;
+            display: flex; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px);
         }
-
         .card {
-            background: white;
-            padding: 30px;
-            border-radius: 24px;
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            border: 6px solid #fff;
-            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            background: white; padding: 30px; border-radius: 20px;
+            width: 90%; max-width: 450px; text-align: center;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3); border: 5px solid #fff;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
-        .card h1 { color: #ff9800; font-size: 2.2rem; margin-bottom: 15px; text-shadow: 2px 2px 0px #ffe0b2; }
-        .card p { font-size: 1.2rem; line-height: 1.5; margin-bottom: 25px; color: #555; }
+        h1 { color: #ff9800; font-size: 2.2rem; margin: 0 0 10px 0; text-shadow: 2px 2px 0px #ffe0b2; }
+        p { color: #555; font-size: 1.2rem; line-height: 1.5; margin-bottom: 20px; }
+        .highlight { color: #e91e63; font-weight: bold; font-size: 1.4rem; display: block; margin-top: 10px; animation: pulse 1.5s infinite; }
 
-        .btn-action {
-            background: linear-gradient(to bottom, #ffb74d, #ff9800);
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: white;
-            border-radius: 16px;
-            cursor: pointer;
-            box-shadow: 0 6px 0 #e65100;
+        .btn {
+            width: 100%; padding: 15px; border: none; border-radius: 12px; 
+            color: white; font-weight: bold; cursor: pointer; font-size: 1.5rem; 
             transition: transform 0.1s, box-shadow 0.1s;
             text-transform: uppercase;
         }
+        .btn:active { transform: translateY(4px); box-shadow: 0 0px #000 !important; }
+        .btn-start { background: linear-gradient(to right, #ff9800, #f57c00); box-shadow: 0 6px #e65100; }
+        .btn-play { background: linear-gradient(to right, #66bb6a, #43a047); box-shadow: 0 6px #2e7d32; width: auto; padding: 15px 40px; margin-top: 10px;}
+        .btn-clear { background: #e0e0e0; color: #333; box-shadow: 0 4px #bdbdbd; width: auto; font-size: 1rem; padding: 10px 20px; }
 
-        .btn-action:active {
-            transform: translateY(6px);
-            box-shadow: 0 0px 0 #e65100;
-        }
+        /* --- GAME ARENA --- */
+        #game-arena { display: none; flex: 1; flex-direction: column; width: 100%; max-width: 800px; margin: 0 auto; }
+        
+        /* HEADER */
+        .header { text-align: center; padding: 10px; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); font-size: 1.5rem; font-weight: bold; }
 
-        /* ==========================================================================
-           3. ARENA GAME & GRID (Pseudo 3D)
-           ========================================================================== */
-        #game-arena {
-            display: none; /* Disembunyikan saat awal */
-            flex: 1;
-            flex-direction: column;
-            max-width: 600px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .level-header {
-            text-align: center;
-            padding: 15px;
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .board-container {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 10px;
-            perspective: 800px; /* Efek kedalaman 3D */
-        }
-
+        /* GRID BOARD */
+        .board-container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 10px; perspective: 800px; }
         .board {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             grid-template-rows: repeat(4, 1fr);
-            gap: 6px;
-            width: 85vw;
-            max-width: 350px;
-            height: 85vw;
-            max-height: 350px;
+            gap: 5px;
+            width: 90vw; max-width: 400px;
+            height: 90vw; max-height: 400px;
             background: #8bc34a;
-            padding: 12px;
-            border-radius: 16px;
-            box-shadow: 0 15px 25px rgba(0,0,0,0.3), inset 0 0 15px rgba(255,255,255,0.4);
-            transform: rotateX(10deg); /* Memiringkan grid */
-            position: relative; /* Penting untuk penempatan kelinci secara absolute */
-        }
-
-        .cell {
-            background: var(--grid-bg);
-            border: 3px solid var(--grid-border);
-            border-radius: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            padding: 10px; border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3), inset 0 0 20px rgba(255,255,255,0.3);
             position: relative;
+            transform: rotateX(10deg); /* Sedikit efek 3D */
+        }
+        .cell {
+            background: var(--grid-bg); border: 2px solid var(--grid-border);
+            border-radius: 8px; position: relative;
+            display: flex; justify-content: center; align-items: center;
         }
 
-        /* Sprites & Entity Rendering */
-        .sprite {
-            position: absolute;
-            z-index: 10;
+        /* SPRITES (Kelinci, Wortel, Batu) */
+        .sprite { 
+            position: absolute; 
+            transition: all 0.5s ease; 
+            z-index: 10; 
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: left 0.4s ease, top 0.4s ease; /* Transisi halus saat pindah */
         }
-
-        /* ==========================================================================
-           4. KONTROL CODING
-           ========================================================================== */
-        .coding-area {
-            background: white;
-            border-top: 6px solid #ffca28;
-            border-radius: 30px 30px 0 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.15);
-        }
-
-        /* Kotak Urutan Perintah */
-        .sequence-box {
-            background: #f0f4f8;
-            border: 3px dashed #b0bec5;
-            border-radius: 16px;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            padding: 5px 10px;
-            gap: 8px;
-            overflow-x: auto; /* Bisa scroll jika penuh */
-            white-space: nowrap;
-        }
-
-        .sequence-box:empty::before {
-            content: "Ketuk panah untuk menyusun kode...";
-            color: #90a4ae;
-            font-style: italic;
-            margin: auto;
-        }
-
-        .seq-block {
-            min-width: 50px; height: 50px;
-            border-radius: 12px;
-            display: flex; justify-content: center; align-items: center;
-            animation: popIn 0.3s;
-            cursor: pointer;
-            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
-            flex-shrink: 0;
-        }
-        .seq-block svg { width: 30px; height: 30px; fill: white; }
-
-        /* Palette Tombol Input */
-        .palette {
-            display: flex;
-            justify-content: space-around;
-        }
-
-        .btn-dir {
-            width: 65px; height: 65px;
-            border-radius: 16px;
-            border: none;
-            display: flex; justify-content: center; align-items: center;
-            cursor: pointer;
-            box-shadow: 0 6px 0 rgba(0,0,0,0.2);
-            transition: transform 0.1s, box-shadow 0.1s, filter 0.2s;
-        }
-        .btn-dir:active { transform: translateY(6px); box-shadow: 0 0px 0 rgba(0,0,0,0); }
-        .btn-dir:disabled { filter: grayscale(1); cursor: not-allowed; transform: none; box-shadow: 0 6px 0 rgba(0,0,0,0.2); }
         
-        .btn-up { background: var(--btn-up); }
-        .btn-down { background: var(--btn-down); }
-        .btn-left { background: var(--btn-left); }
-        .btn-right { background: var(--btn-right); }
-        .btn-dir svg { width: 40px; height: 40px; fill: white; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3)); }
-
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* Animasi Melompat (Motorik Kasar) */
+        @keyframes hopUp {
+            0% { transform: translateY(0) scale(1, 1); }
+            30% { transform: translateY(-40px) scale(0.9, 1.1); }
+            50% { transform: translateY(-50px) scale(1, 1); }
+            70% { transform: translateY(-40px) scale(1.1, 0.9); }
+            100% { transform: translateY(0) scale(1, 1); }
         }
-
-        .btn-clear {
-            background: #e0e0e0; border: none; color: #555;
-            padding: 10px 20px; border-radius: 12px; font-weight: bold;
-            box-shadow: 0 4px 0 #bdbdbd; cursor: pointer; transition: transform 0.1s;
-        }
-        .btn-clear:active { transform: translateY(4px); box-shadow: 0 0 0; }
-        .btn-clear:disabled { opacity: 0.5; }
-
-        .btn-play {
-            background: linear-gradient(to bottom, #81c784, #4caf50);
-            border: none; color: white; font-size: 1.2rem; font-weight: bold;
-            padding: 12px 30px; border-radius: 16px;
-            box-shadow: 0 5px 0 #388e3c; cursor: pointer; transition: transform 0.1s;
-        }
-        .btn-play:active { transform: translateY(5px); box-shadow: 0 0 0; }
-        .btn-play:disabled { filter: grayscale(1); opacity: 0.7; cursor: not-allowed; }
-
-        /* ==========================================================================
-           5. KEYFRAMES & ANIMASI
-           ========================================================================== */
-        @keyframes popIn {
-            0% { transform: scale(0.7); opacity: 0; }
-            80% { transform: scale(1.05); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
-        }
+        .hopping { animation: hopUp 0.6s ease-in-out !important; }
+        .idle-bounce { animation: pulse 2s infinite; }
 
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+            50% { transform: scale(1.05); }
         }
-        .anim-pulse { animation: pulse 2s infinite ease-in-out; }
 
-        @keyframes hopUp {
-            0%   { transform: translateY(0) scale(1, 1); }
-            30%  { transform: translateY(-40px) scale(0.9, 1.1); }
-            50%  { transform: translateY(-50px) scale(1, 1); }
-            70%  { transform: translateY(-40px) scale(1.1, 0.9); }
-            100% { transform: translateY(0) scale(1, 1); }
+        /* --- KONTROL CODING (BAWAH) --- */
+        .coding-area {
+            background: white; border-top: 5px solid #ffca28;
+            border-radius: 20px 20px 0 0; padding: 15px;
+            display: flex; flex-direction: column; gap: 15px;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
         }
-        .anim-hop { animation: hopUp 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
 
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-10px); }
-            40%, 80% { transform: translateX(10px); }
+        /* Tempat naruh blok (Sequence) */
+        .sequence-box {
+            background: #f5f5f5; border: 3px dashed #ccc; border-radius: 12px;
+            height: 70px; display: flex; align-items: center; padding: 5px;
+            overflow-x: auto; gap: 5px;
         }
-        .anim-shake { animation: shake 0.4s ease-in-out; }
+        .sequence-box:empty::before {
+            content: "Ketuk panah untuk menyusun kode...";
+            color: #aaa; font-style: italic; margin: auto; font-size: 1.1rem;
+        }
 
+        /* Palette Panah */
+        .palette { display: flex; justify-content: space-around; }
+        .coding-block {
+            width: 60px; height: 60px; border-radius: 12px; border: none;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; transition: transform 0.1s;
+            box-shadow: 0 5px rgba(0,0,0,0.2);
+        }
+        .coding-block:active { transform: translateY(5px); box-shadow: 0 0 rgba(0,0,0,0); }
+        
+        .coding-block svg { width: 40px; height: 40px; fill: white; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3)); }
+        
+        .cb-up { background: var(--block-up); }
+        .cb-down { background: var(--block-down); }
+        .cb-left { background: var(--block-left); }
+        .cb-right { background: var(--block-right); }
+
+        .block-item {
+            min-width: 50px; height: 50px; border-radius: 8px;
+            display: flex; justify-content: center; align-items: center;
+            animation: popIn 0.2s; cursor: pointer;
+            box-shadow: 0 3px rgba(0,0,0,0.2);
+        }
+        .block-item svg { width: 30px; height: 30px; fill: white; }
+
+        .controls { display: flex; justify-content: space-between; align-items: center; }
+
+        /* Feedback Error */
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 
+            10%, 90% { transform: translate3d(-1px, 0, 0); } 
+            20%, 80% { transform: translate3d(2px, 0, 0); } 
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 
+            40%, 60% { transform: translate3d(4px, 0, 0); } 
+        }
     </style>
 </head>
 <body>
 
-    <!-- OVERLAY: MENU UTAMA -->
+    <!-- MENU UTAMA -->
     <div id="menu-screen" class="overlay">
         <div class="card">
-            <h1>🐰 Kelinci Coding</h1>
-            <p>Bantu kelinci putih mencari wortel dengan menyusun panah arah yang tepat!</p>
-            <!-- Ilustrasi Mini -->
-            <div style="height: 80px; margin-bottom: 20px; display: flex; justify-content: center; gap: 20px;">
-                <div id="illus-bunny" style="width: 60px; height: 60px;"></div>
-                <div style="font-size: 2rem; margin-top:10px;">➔</div>
-                <div id="illus-carrot" class="anim-pulse" style="width: 60px; height: 60px;"></div>
-            </div>
-            <button class="btn-action" onclick="startGame()">▶ Mulai Main</button>
+            <h1>🐰 Kelinci Coding 🥕</h1>
+            <p>Bantu kelinci putih mencari wortel dengan menyusun panah arah.</p>
+            <p style="font-size: 1rem; color: #1976D2; background: #e3f2fd; padding: 10px; border-radius: 8px;">
+                <b>Tips untuk Ayah/Bunda & Guru:</b><br>
+                Saat kelinci di layar melompat, ajak anak untuk ikut <b>MELOMPAT</b> di dunia nyata!
+            </p>
+            <span class="highlight">Ayo Melompat Bersama!</span>
+            <button class="btn btn-start" onclick="startGame()" style="margin-top: 20px;">▶ MULAI BERMAIN</button>
         </div>
     </div>
 
-    <!-- OVERLAY: LAYAR KEMENANGAN -->
-    <div id="win-screen" class="overlay" style="display:none;">
+    <!-- MENANG / LEVEL SELESAI -->
+    <div id="win-screen" class="overlay" style="display:none">
         <div class="card">
-            <h1>🎉 Horeee! 🎉</h1>
+            <h1>🎉 HOREEE! 🎉</h1>
             <p>Kelinci berhasil mendapatkan wortelnya!</p>
-            <div id="win-bunny" class="anim-pulse" style="width: 100px; height: 100px; margin: 0 auto 20px auto;"></div>
-            <button class="btn-action" onclick="nextLevel()">Level Selanjutnya ➔</button>
+            <!-- SVG Kelinci Senang -->
+            <svg width="100" height="100" viewBox="0 0 100 100" class="idle-bounce">
+                <circle cx="50" cy="50" r="40" fill="white" />
+                <path d="M 30 50 Q 50 70 70 50" stroke="#333" stroke-width="5" fill="none" stroke-linecap="round"/>
+                <ellipse cx="35" cy="40" rx="4" ry="8" fill="#333"/>
+                <ellipse cx="65" cy="40" rx="4" ry="8" fill="#333"/>
+                <path d="M 45 45 L 50 50 L 55 45" stroke="pink" stroke-width="3" fill="none"/>
+                <!-- Telinga -->
+                <ellipse cx="35" cy="15" rx="8" ry="25" fill="white" transform="rotate(-15 35 15)"/>
+                <ellipse cx="35" cy="15" rx="4" ry="15" fill="pink" transform="rotate(-15 35 15)"/>
+                <ellipse cx="65" cy="15" rx="8" ry="25" fill="white" transform="rotate(15 65 15)"/>
+                <ellipse cx="65" cy="15" rx="4" ry="15" fill="pink" transform="rotate(15 65 15)"/>
+            </svg>
+            <button class="btn btn-start" onclick="nextLevel()" style="margin-top: 20px;">LEVEL SELANJUTNYA ➔</button>
         </div>
     </div>
 
-    <!-- KONTRIBUSI ARENA GAME -->
+    <!-- GAME ARENA -->
     <div id="game-arena">
-        <div class="level-header" id="level-text">Level 1</div>
+        <div class="header" id="level-text">Level 1</div>
         
         <div class="board-container">
             <div class="board" id="board">
-                <!-- Grid Cells akan di-generate via JS -->
+                <!-- Grid Cells akan di-generate oleh JS -->
             </div>
         </div>
 
         <div class="coding-area">
-            <!-- Kotak Urutan Perintah -->
-            <div class="sequence-box" id="sequence-box"></div>
+            <div class="sequence-box" id="sequence-box">
+                <!-- Block sequence akan muncul di sini -->
+            </div>
             
-            <!-- Tombol Palette Input -->
             <div class="palette">
-                <button class="btn-dir btn-up" id="btn-up" onclick="addBlock('up')"></button>
-                <button class="btn-dir btn-down" id="btn-down" onclick="addBlock('down')"></button>
-                <button class="btn-dir btn-left" id="btn-left" onclick="addBlock('left')"></button>
-                <button class="btn-dir btn-right" id="btn-right" onclick="addBlock('right')"></button>
+                <button class="coding-block cb-up" onclick="addBlock('up')">
+                    <svg viewBox="0 0 24 24"><path d="M12 4l-8 8h6v8h4v-8h6z"/></svg>
+                </button>
+                <button class="coding-block cb-down" onclick="addBlock('down')">
+                    <svg viewBox="0 0 24 24"><path d="M12 20l8-8h-6v-8h-4v8h-6z"/></svg>
+                </button>
+                <button class="coding-block cb-left" onclick="addBlock('left')">
+                    <svg viewBox="0 0 24 24"><path d="M4 12l8-8v6h8v4h-8v6z"/></svg>
+                </button>
+                <button class="coding-block cb-right" onclick="addBlock('right')">
+                    <svg viewBox="0 0 24 24"><path d="M20 12l-8 8v-6h-8v-4h8v-6z"/></svg>
+                </button>
             </div>
 
-            <!-- Kontrol Aksi -->
             <div class="controls">
-                <button class="btn-clear" id="btn-clear" onclick="clearSequence()">🗑 Hapus</button>
-                <button class="btn-play" id="btn-play" onclick="runCode()">▶ JALANKAN</button>
+                <button class="btn btn-clear" onclick="clearSequence()">🗑 Hapus Semua</button>
+                <button class="btn btn-play" id="btn-play" onclick="runCode()">▶ JALANKAN</button>
             </div>
         </div>
     </div>
 
     <script>
-        /* ==========================================================================
-           1. ASSETS (INLINE SVG)
-           ========================================================================== */
-        // Menggunakan SVG path murni dengan filter drop-shadow inline
-        const ASSETS = {
-            bunny: `
-                <svg viewBox="0 0 100 100" width="100%" height="100%" style="filter: drop-shadow(0 5px 5px rgba(0,0,0,0.4));">
-                    <!-- Telinga Kiri -->
-                    <ellipse cx="35" cy="25" rx="10" ry="25" fill="#ffffff" transform="rotate(-15 35 25)"/>
-                    <ellipse cx="35" cy="25" rx="5" ry="18" fill="#f8bbd0" transform="rotate(-15 35 25)"/>
-                    <!-- Telinga Kanan -->
-                    <ellipse cx="65" cy="25" rx="10" ry="25" fill="#ffffff" transform="rotate(15 65 25)"/>
-                    <ellipse cx="65" cy="25" rx="5" ry="18" fill="#f8bbd0" transform="rotate(15 65 25)"/>
-                    <!-- Badan -->
-                    <ellipse cx="50" cy="70" rx="35" ry="28" fill="#ffffff"/>
-                    <!-- Kepala -->
-                    <circle cx="50" cy="50" r="25" fill="#ffffff"/>
-                    <!-- Mata -->
-                    <circle cx="40" cy="45" r="4" fill="#263238"/>
-                    <circle cx="60" cy="45" r="4" fill="#263238"/>
-                    <!-- Hidung -->
-                    <path d="M 47 52 L 53 52 L 50 56 Z" fill="#ec407a"/>
-                    <!-- Kaki -->
-                    <ellipse cx="30" cy="90" rx="12" ry="6" fill="#eeeeee"/>
-                    <ellipse cx="70" cy="90" rx="12" ry="6" fill="#eeeeee"/>
-                    <!-- Ekor -->
-                    <circle cx="15" cy="75" r="10" fill="#e0e0e0"/>
-                </svg>
-            `,
-            carrot: `
-                <svg viewBox="0 0 100 100" width="100%" height="100%" style="filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3));">
-                    <!-- Daun -->
-                    <path d="M 50 30 Q 30 10 45 15 Q 50 -5 55 15 Q 70 10 50 30 Z" fill="#4caf50"/>
-                    <path d="M 50 35 L 50 15" stroke="#2e7d32" stroke-width="3"/>
-                    <!-- Badan Wortel -->
-                    <path d="M 35 30 Q 50 20 65 30 L 55 90 Q 50 100 45 90 Z" fill="#ff9800"/>
-                    <path d="M 40 45 Q 50 50 55 45" stroke="#e65100" stroke-width="2" fill="none"/>
-                    <path d="M 42 65 Q 50 70 58 65" stroke="#e65100" stroke-width="2" fill="none"/>
-                </svg>
-            `,
-            rock: `
-                <svg viewBox="0 0 100 100" width="100%" height="100%" style="filter: drop-shadow(0 6px 4px rgba(0,0,0,0.5));">
-                    <path d="M 20 85 L 10 60 L 30 25 L 60 15 L 85 40 L 90 75 L 60 95 Z" fill="#78909c"/>
-                    <path d="M 25 80 L 15 60 L 32 30 L 58 22 L 80 43 L 83 72 L 58 88 Z" fill="#90a4ae"/>
-                    <!-- Detail retakan -->
-                    <path d="M 30 40 L 45 55 L 40 70" stroke="#607d8b" stroke-width="3" fill="none"/>
-                    <path d="M 70 50 L 55 60 L 65 75" stroke="#607d8b" stroke-width="3" fill="none"/>
-                </svg>
-            `,
-            arrows: {
-                up: `<svg viewBox="0 0 24 24"><path d="M12 4l-8 8h6v8h4v-8h6z"/></svg>`,
-                down: `<svg viewBox="0 0 24 24"><path d="M12 20l8-8h-6v-8h-4v8h-6z"/></svg>`,
-                left: `<svg viewBox="0 0 24 24"><path d="M4 12l8-8v6h8v4h-8v6z"/></svg>`,
-                right: `<svg viewBox="0 0 24 24"><path d="M20 12l-8 8v-6h-8v-4h8v-6z"/></svg>`
-            }
+        // --- ASSETS (SVG Inline) ---
+        const SVG_BUNNY = `
+            <svg viewBox="0 0 100 100" style="width:100%; height:100%; drop-shadow: 2px 4px 4px rgba(0,0,0,0.4);">
+                <ellipse cx="50" cy="65" rx="30" ry="25" fill="white"/>
+                <circle cx="50" cy="40" r="22" fill="white"/>
+                <!-- Telinga -->
+                <ellipse cx="40" cy="15" rx="6" ry="20" fill="white" transform="rotate(-15 40 15)"/>
+                <ellipse cx="40" cy="15" rx="3" ry="12" fill="pink" transform="rotate(-15 40 15)"/>
+                <ellipse cx="60" cy="15" rx="6" ry="20" fill="white" transform="rotate(15 60 15)"/>
+                <ellipse cx="60" cy="15" rx="3" ry="12" fill="pink" transform="rotate(15 60 15)"/>
+                <!-- Mata -->
+                <circle cx="43" cy="35" r="3" fill="#333"/>
+                <circle cx="57" cy="35" r="3" fill="#333"/>
+                <!-- Hidung -->
+                <path d="M 48 42 L 52 42 L 50 45 Z" fill="pink"/>
+                <!-- Kaki -->
+                <ellipse cx="35" cy="85" rx="10" ry="5" fill="white"/>
+                <ellipse cx="65" cy="85" rx="10" ry="5" fill="white"/>
+                <!-- Ekor -->
+                <circle cx="20" cy="65" r="8" fill="#f0f0f0"/>
+            </svg>
+        `;
+
+        const SVG_CARROT = `
+            <svg viewBox="0 0 100 100" class="idle-bounce" style="width:100%; height:100%; filter: drop-shadow(2px 4px 2px rgba(0,0,0,0.3));">
+                <path d="M 40 20 Q 50 0 60 20 L 50 90 Z" fill="#ff9800"/>
+                <path d="M 45 40 Q 50 50 55 40" stroke="#e65100" stroke-width="2" fill="none"/>
+                <path d="M 42 60 Q 50 70 52 60" stroke="#e65100" stroke-width="2" fill="none"/>
+                <!-- Daun -->
+                <path d="M 50 20 Q 30 0 45 10 Z" fill="#4caf50"/>
+                <path d="M 50 20 Q 70 0 55 10 Z" fill="#4caf50"/>
+                <path d="M 50 20 Q 50 -5 50 10 Z" stroke="#4caf50" stroke-width="4"/>
+            </svg>
+        `;
+
+        const SVG_ROCK = `
+            <svg viewBox="0 0 100 100" style="width:100%; height:100%; filter: drop-shadow(2px 4px 2px rgba(0,0,0,0.4));">
+                <path d="M 20 80 Q 10 50 30 30 Q 50 10 70 30 Q 90 50 80 80 Q 50 95 20 80 Z" fill="#78909c"/>
+                <path d="M 30 40 Q 40 30 50 40" stroke="#b0bec5" stroke-width="4" fill="none" stroke-linecap="round"/>
+                <path d="M 60 60 Q 70 50 75 65" stroke="#546e7a" stroke-width="4" fill="none" stroke-linecap="round"/>
+            </svg>
+        `;
+
+        const SVG_ARROWS = {
+            up: `<svg viewBox="0 0 24 24"><path d="M12 4l-8 8h6v8h4v-8h6z"/></svg>`,
+            down: `<svg viewBox="0 0 24 24"><path d="M12 20l8-8h-6v-8h-4v8h-6z"/></svg>`,
+            left: `<svg viewBox="0 0 24 24"><path d="M4 12l8-8v6h8v4h-8v6z"/></svg>`,
+            right: `<svg viewBox="0 0 24 24"><path d="M20 12l-8 8v-6h-8v-4h8v-6z"/></svg>`
         };
 
-        // Render ilustrasi pada Pop-ups
-        document.getElementById('illus-bunny').innerHTML = ASSETS.bunny;
-        document.getElementById('illus-carrot').innerHTML = ASSETS.carrot;
-        document.getElementById('win-bunny').innerHTML = ASSETS.bunny;
+        // --- GAME LOGIC ---
+        const LEVELS = [
+            { start: {x:0, y:3}, goal: {x:2, y:3}, rocks: [] }, // Lv 1: Kanan 2x
+            { start: {x:0, y:3}, goal: {x:3, y:1}, rocks: [] }, // Lv 2: L shape
+            { start: {x:0, y:3}, goal: {x:3, y:3}, rocks: [{x:1, y:3}, {x:2, y:2}] }, // Lv 3: Ada batu
+            { start: {x:0, y:0}, goal: {x:3, y:3}, rocks: [{x:1, y:0}, {x:1, y:1}, {x:2, y:3}] } // Lv 4: Lebih kompleks
+        ];
 
-        // Render ikon panah pada tombol palette
-        document.getElementById('btn-up').innerHTML = ASSETS.arrows.up;
-        document.getElementById('btn-down').innerHTML = ASSETS.arrows.down;
-        document.getElementById('btn-left').innerHTML = ASSETS.arrows.left;
-        document.getElementById('btn-right').innerHTML = ASSETS.arrows.right;
-
-        /* ==========================================================================
-           2. GAME LOGIC & STATE
-           ========================================================================== */
-        // Konfigurasi Level (Kini menggunakan generator prosedural)
         let currentLevel = 0;
         let sequence = [];
-        let bunnyPos = {x: 0, y: 0};
         let isRunning = false;
-        let bunnyDOM = null; // Elemen DOM Kelinci di arena
-        let currentLevelData = null; // Menyimpan data level yang sedang aktif
+        
+        // Status Posisi
+        let bunnyPos = {x:0, y:0};
+        let bunnyDOM = null;
 
-        // Generator Level Prosedural (Tak Terhingga)
-        function generateLevel(lvlIndex) {
-            let numRocks = Math.min(Math.floor(lvlIndex / 2), 6); // Bertambah 1 batu tiap 2 level (maks 6 batu)
-            let minDistance = Math.min(1 + Math.floor(lvlIndex / 3), 5); // Jarak minimal target makin jauh
-
-            let valid = false;
-            let start, goal, rocks;
-
-            while (!valid) {
-                // Tentukan Start & Goal acak (Grid 4x4)
-                start = { x: Math.floor(Math.random() * 4), y: Math.floor(Math.random() * 4) };
-                goal = { x: Math.floor(Math.random() * 4), y: Math.floor(Math.random() * 4) };
-                
-                // Hitung jarak (Manhattan distance)
-                let dist = Math.abs(start.x - goal.x) + Math.abs(start.y - goal.y);
-                if (dist < minDistance || (start.x === goal.x && start.y === goal.y)) continue;
-
-                // Tentukan letak batu secara acak di sel yang kosong
-                rocks = [];
-                let availableSpots = [];
-                for(let x = 0; x < 4; x++) {
-                    for(let y = 0; y < 4; y++) {
-                        if((x !== start.x || y !== start.y) && (x !== goal.x || y !== goal.y)){
-                            availableSpots.push({x, y});
-                        }
-                    }
-                }
-                
-                // Acak urutan dan ambil sejumlah numRocks
-                availableSpots.sort(() => Math.random() - 0.5);
-                rocks = availableSpots.slice(0, numRocks);
-
-                // Pastikan ada jalan yang bisa dilewati menggunakan BFS
-                valid = isSolvable(start, goal, rocks);
-            }
-
-            return { start, goal, rocks };
-        }
-
-        // Algoritma Breadth-First Search (BFS) untuk memvalidasi map
-        function isSolvable(start, goal, rocks) {
-            let queue = [{x: start.x, y: start.y}];
-            let visited = new Set([`${start.x},${start.y}`]);
-            const isRock = (x, y) => rocks.some(r => r.x === x && r.y === y);
-
-            while(queue.length > 0) {
-                let curr = queue.shift();
-                if(curr.x === goal.x && curr.y === goal.y) return true;
-
-                const dirs = [[0,1], [0,-1], [1,0], [-1,0]];
-                for(let d of dirs) {
-                    let nx = curr.x + d[0];
-                    let ny = curr.y + d[1];
-                    let key = `${nx},${ny}`;
-                    
-                    if(nx >= 0 && nx < 4 && ny >= 0 && ny < 4 && !visited.has(key) && !isRock(nx, ny)) {
-                        visited.add(key);
-                        queue.push({x: nx, y: ny});
-                    }
-                }
-            }
-            return false;
-        }
-
-        /* ==========================================================================
-           3. INISIALISASI & PEMBANGUNAN ARENA
-           ========================================================================== */
         function startGame() {
             document.getElementById('menu-screen').style.display = 'none';
             document.getElementById('game-arena').style.display = 'flex';
             loadLevel(0);
         }
 
+        function nextLevel() {
+            document.getElementById('win-screen').style.display = 'none';
+            currentLevel++;
+            if (currentLevel >= LEVELS.length) {
+                // Tamat
+                alert("Wah, kamu hebat sekali! Semua level selesai!");
+                currentLevel = 0;
+                document.getElementById('menu-screen').style.display = 'flex';
+                document.getElementById('game-arena').style.display = 'none';
+            } else {
+                loadLevel(currentLevel);
+            }
+        }
+
         function loadLevel(lvlIndex) {
-            currentLevelData = generateLevel(lvlIndex);
+            const level = LEVELS[lvlIndex];
             document.getElementById('level-text').innerText = `Level ${lvlIndex + 1}`;
-            
-            // Reset state
-            bunnyPos = { ...currentLevelData.start };
+            bunnyPos = { ...level.start };
             sequence = [];
             renderSequence();
-            buildBoard(currentLevelData);
+            buildBoard(level);
             enableControls(true);
         }
 
@@ -510,55 +347,45 @@
             const board = document.getElementById('board');
             board.innerHTML = ''; // Bersihkan board
 
-            // Buat Grid 4x4 (16 cells)
+            // Buat 16 cell (4x4)
             for (let y = 0; y < 4; y++) {
                 for (let x = 0; x < 4; x++) {
                     const cell = document.createElement('div');
                     cell.className = 'cell';
                     cell.id = `cell-${x}-${y}`;
                     
-                    // Letakkan Wortel (Goal)
+                    // Render Goal
                     if (x === level.goal.x && y === level.goal.y) {
-                        const carrot = document.createElement('div');
-                        carrot.innerHTML = ASSETS.carrot;
-                        carrot.className = 'anim-pulse';
-                        carrot.style.width = '70%'; height = '70%';
-                        cell.appendChild(carrot);
+                        cell.innerHTML = SVG_CARROT;
                     }
                     
-                    // Letakkan Batu (Rintangan)
+                    // Render Rocks
                     if (level.rocks.some(r => r.x === x && r.y === y)) {
-                        const rock = document.createElement('div');
-                        rock.innerHTML = ASSETS.rock;
-                        rock.style.width = '80%'; height = '80%';
-                        cell.dataset.rock = "true"; // Penanda rintangan
-                        cell.appendChild(rock);
+                        cell.innerHTML = SVG_ROCK;
+                        cell.dataset.rock = "true";
                     }
 
                     board.appendChild(cell);
                 }
             }
 
-            // Buat & letakkan Kelinci sebagai elemen absolut
-            if (!bunnyDOM) {
-                bunnyDOM = document.createElement('div');
-                bunnyDOM.className = 'sprite';
-                bunnyDOM.innerHTML = ASSETS.bunny;
-            }
-            board.appendChild(bunnyDOM);
-            
-            // Posisikan kelinci setelah render DOM selesai sejenak
-            setTimeout(updateBunnyPosition, 50); 
+            // Letakkan Kelinci
+            bunnyDOM = document.createElement('div');
+            bunnyDOM.className = 'sprite';
+            bunnyDOM.innerHTML = SVG_BUNNY;
+            updateBunnyPosition();
         }
 
-        /**
-         * Sistem Koordinat & DOM:
-         * Menghitung posisi absolut kelinci berdasarkan ukuran sel grid secara dinamis.
-         * Ini memastikan posisi tetap akurat meski ukuran layar berubah (resize).
-         */
         function updateBunnyPosition() {
             const targetCell = document.getElementById(`cell-${bunnyPos.x}-${bunnyPos.y}`);
-            if (targetCell && bunnyDOM) {
+            if (targetCell) {
+                // Tambahkan kelinci ke board secara absolute overlay
+                if (!bunnyDOM.parentElement) {
+                    document.getElementById('board').appendChild(bunnyDOM);
+                }
+                
+                // Posisikan dan ukur kelinci persis mengikuti dimensi cell yang ditempati
+                // Ini mencegah objek bocor keluar arena
                 bunnyDOM.style.width = targetCell.offsetWidth + 'px';
                 bunnyDOM.style.height = targetCell.offsetHeight + 'px';
                 bunnyDOM.style.left = targetCell.offsetLeft + 'px';
@@ -566,20 +393,18 @@
             }
         }
 
-        // Listener untuk mengatur ulang posisi jika layar di-resize (misal orientasi HP berubah)
+        // Listener agar kelinci menyesuaikan letaknya saat ukuran layar/HP berubah
         window.addEventListener('resize', () => {
-            if (document.getElementById('game-arena').style.display !== 'none') {
+            if (bunnyDOM && document.getElementById('game-arena').style.display !== 'none') {
                 updateBunnyPosition();
             }
         });
 
-        /* ==========================================================================
-           4. SISTEM INPUT CODING
-           ========================================================================== */
+        // --- CODING CONTROLS ---
         function addBlock(dir) {
             if (isRunning) return;
-            if (sequence.length >= 12) {
-                alert("Kode terlalu panjang! Maksimal 12 langkah.");
+            if (sequence.length >= 8) {
+                alert("Kode terlalu panjang! Coba jalankan dulu.");
                 return;
             }
             sequence.push(dir);
@@ -604,44 +429,36 @@
             
             sequence.forEach((dir, index) => {
                 const block = document.createElement('div');
-                block.className = `seq-block btn-${dir}`; // reuse warna background
-                block.innerHTML = ASSETS.arrows[dir];
+                block.className = `block-item cb-${dir}`;
+                block.innerHTML = SVG_ARROWS[dir];
                 block.onclick = () => removeBlock(index);
                 box.appendChild(block);
             });
-            // Auto-scroll ke kanan jika blok bertambah
+            // Auto scroll to right
             box.scrollLeft = box.scrollWidth;
         }
 
         function enableControls(state) {
             isRunning = !state;
-            const buttons = document.querySelectorAll('.palette button, .controls button');
-            buttons.forEach(btn => btn.disabled = !state);
-            
-            const btnPlay = document.getElementById('btn-play');
-            btnPlay.innerText = state ? '▶ JALANKAN' : '⏳ BERJALAN...';
+            document.getElementById('btn-play').style.opacity = state ? '1' : '0.5';
+            document.getElementById('btn-play').innerText = state ? '▶ JALANKAN' : '⏳ BERJALAN...';
         }
 
-        /* ==========================================================================
-           5. MESIN EKSEKUSI (THE LOOP)
-           ========================================================================== */
-        // Fungsi utilitas untuk jeda (jeda antar langkah / animasi)
-        const sleep = ms => new Promise(r => setTimeout(r, ms));
-
+        // --- EXECUTION (Gerakan Psikomotor / Logika) ---
         async function runCode() {
             if (isRunning || sequence.length === 0) return;
-            enableControls(false); // Kunci kontrol
+            enableControls(false);
 
-            const level = currentLevelData;
-            
-            // Reset posisi kelinci ke titik awal sebelum dieksekusi
+            // Reset posisi ke start awal level sebelum jalan
+            const level = LEVELS[currentLevel];
             bunnyPos = { ...level.start };
             updateBunnyPosition();
-            await sleep(500); // Jeda sebelum mulai gerak
+            
+            // Beri jeda sebentar sebelum mulai gerak
+            await sleep(500);
 
-            let hasCrashed = false;
+            let crashed = false;
 
-            // Eksekusi urutan perintah menggunakan async loop
             for (let i = 0; i < sequence.length; i++) {
                 const dir = sequence[i];
                 let nextX = bunnyPos.x;
@@ -652,74 +469,65 @@
                 if (dir === 'left') nextX--;
                 if (dir === 'right') nextX++;
 
-                // 1. Deteksi Tabrakan: Keluar Batas Grid
+                // Cek Nabrak Tembok (Luar Grid)
                 if (nextX < 0 || nextX > 3 || nextY < 0 || nextY > 3) {
-                    await triggerCrash();
-                    hasCrashed = true;
+                    crashAnim();
+                    crashed = true;
                     break;
                 }
 
-                // 2. Deteksi Tabrakan: Nabrak Batu
+                // Cek Nabrak Batu
                 const targetCell = document.getElementById(`cell-${nextX}-${nextY}`);
                 if (targetCell && targetCell.dataset.rock === "true") {
-                    await triggerCrash();
-                    hasCrashed = true;
+                    crashAnim();
+                    crashed = true;
                     break;
                 }
 
-                // Jika aman, pindahkan koordinat State
+                // Jika aman, pindah
                 bunnyPos.x = nextX;
                 bunnyPos.y = nextY;
                 
-                // Mulai animasi melompat dan update posisi DOM
-                bunnyDOM.classList.remove('anim-hop');
-                void bunnyDOM.offsetWidth; // Trigger reflow untuk reset animasi CSS
-                bunnyDOM.classList.add('anim-hop');
-                
+                // Tambahkan class hopping untuk animasi melompat (stimulus motorik)
+                bunnyDOM.classList.add('hopping');
                 updateBunnyPosition();
                 
-                // Tunggu durasi animasi selesai sebelum iterasi berikutnya
-                await sleep(500); 
-                bunnyDOM.classList.remove('anim-hop');
-                await sleep(100); // Jeda bernafas antar lompatan
+                // Suara/Feedback imajiner: Minta anak loncat (via instruksi awal)
+                await sleep(600); // Waktu animasi lompat
+                bunnyDOM.classList.remove('hopping');
+                await sleep(200); // Jeda sebelum lompat berikutnya
             }
 
-            // Cek Kondisi Kemenangan jika tidak tabrakan
-            if (!hasCrashed) {
+            // Cek Menang (jika tidak crash)
+            if (!crashed) {
                 if (bunnyPos.x === level.goal.x && bunnyPos.y === level.goal.y) {
-                    // MENANG!
-                    await sleep(400);
-                    document.getElementById('win-screen').style.display = 'flex';
+                    setTimeout(() => {
+                        document.getElementById('win-screen').style.display = 'flex';
+                    }, 500);
                 } else {
-                    // Tidak sampai tujuan, salah logika (reset level)
-                    await triggerCrash();
+                    // Kurang tepat, reset
+                    setTimeout(() => {
+                        bunnyDOM.classList.add('shake');
+                        setTimeout(() => {
+                            bunnyDOM.classList.remove('shake');
+                            loadLevel(currentLevel); // Reset
+                        }, 500);
+                    }, 500);
                 }
             } else {
-                // Setelah crash, load ulang level
-                loadLevel(currentLevel);
+                // Kalau nabrak, reset level
+                setTimeout(() => loadLevel(currentLevel), 1000);
             }
         }
 
-        // Animasi menabrak rintangan atau batas layar
-        async function triggerCrash() {
-            bunnyDOM.classList.add('anim-shake');
-            await sleep(500);
-            bunnyDOM.classList.remove('anim-shake');
-            loadLevel(currentLevel); // Reset posisi
+        function crashAnim() {
+            bunnyDOM.classList.add('shake');
         }
 
-        // Fungsi Next Level dipanggil dari layar kemenangan
-        function nextLevel() {
-            document.getElementById('win-screen').style.display = 'none';
-            currentLevel++;
-            
-            // Menampilkan pop-up penyemangat setiap melewati 5 level
-            if (currentLevel > 0 && currentLevel % 5 === 0) {
-                alert(`🎉 Wah Hebat! Kamu sudah mencapai Level ${currentLevel + 1}! Ayo semangat terus!`);
-            }
-            
-            loadLevel(currentLevel);
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
         }
+
     </script>
 </body>
 </html>
